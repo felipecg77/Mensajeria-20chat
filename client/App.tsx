@@ -22,6 +22,9 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/pet-selection" element={<TamagotchiSelection />} />
+          <Route path="/room-selection" element={<RoomSelection />} />
+          <Route path="/multiplayer" element={<MultiplayerChat />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
