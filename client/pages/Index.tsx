@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Utensils, Gamepad2, Send, MoreVertical, Phone, Video } from "lucide-react";
+import { Heart, Utensils, Gamepad2, Send, MoreVertical, Phone, Video, Users } from "lucide-react";
+import { Link } from "react-router-dom";
 
 type Message = {
   id: string;
@@ -130,7 +131,7 @@ export default function Index() {
 
     const feedMessage: Message = {
       id: Date.now().toString(),
-      text: "¡Mmm, delicioso! ¡Gracias por alimentarme! ��✨",
+      text: "¡Mmm, delicioso! ¡Gracias por alimentarme! 🍎✨",
       timestamp: new Date(),
       isUser: false,
     };
