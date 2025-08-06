@@ -130,7 +130,7 @@ export default function Index() {
 
     const feedMessage: Message = {
       id: Date.now().toString(),
-      text: "¡Mmm, delicioso! ¡Gracias por alimentarme! 🍎✨",
+      text: "¡Mmm, delicioso! ¡Gracias por alimentarme! ��✨",
       timestamp: new Date(),
       isUser: false,
     };
@@ -309,7 +309,7 @@ export default function Index() {
 
       {/* Message Input */}
       <div className="p-4 border-t border-border bg-background">
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 mb-3">
           <Input
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
@@ -325,6 +325,16 @@ export default function Index() {
           >
             <Send className="h-4 w-4" />
           </Button>
+        </div>
+
+        {/* Multiplayer Button */}
+        <div className="text-center">
+          <Link to="/pet-selection">
+            <Button variant="outline" className="w-full">
+              <Users className="h-4 w-4 mr-2" />
+              ¡Jugar con Amigos!
+            </Button>
+          </Link>
         </div>
       </div>
     </div>
