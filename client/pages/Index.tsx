@@ -3,8 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Utensils, Gamepad2, Send, MoreVertical, Phone, Video, Users } from "lucide-react";
+import { Heart, Utensils, Gamepad2, Send, MoreVertical, Phone, Video, Users, Settings, User, Info, Moon, Sun, Volume2, VolumeX } from "lucide-react";
 import { Link } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type Message = {
   id: string;
@@ -40,6 +48,9 @@ export default function Index() {
     health: 90,
   });
   const [lastInteraction, setLastInteraction] = useState(new Date());
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isSoundEnabled, setIsSoundEnabled] = useState(true);
+  const [showPetInfo, setShowPetInfo] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -49,6 +60,21 @@ export default function Index() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    // Check if dark mode is enabled
+    const savedDarkMode = localStorage.getItem("darkMode");
+    if (savedDarkMode === "true") {
+      setIsDarkMode(true);
+      document.documentElement.classList.add("dark");
+    }
+
+    // Check sound preference
+    const savedSound = localStorage.getItem("soundEnabled");
+    if (savedSound === "false") {
+      setIsSoundEnabled(false);
+    }
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -172,6 +198,32 @@ export default function Index() {
     setMessages(prev => [...prev, loveMessage]);
   };
 
+  const toggleDarkMode = () => {
+    const newDarkMode = !isDarkMode;
+    setIsDarkMode(newDarkMode);
+    localStorage.setItem("darkMode", newDarkMode.toString());
+
+    if (newDarkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  };
+
+  const toggleSound = () => {
+    const newSoundState = !isSoundEnabled;
+    setIsSoundEnabled(newSoundState);
+    localStorage.setItem("soundEnabled", newSoundState.toString());
+  };
+
+  const handleShowProfile = () => {
+    alert("Perfil: TamaChatBot v1.0\nDesarrollado con ❤️ para cuidar mascotas virtuales");
+  };
+
+  const handleShowInfo = () => {
+    setShowPetInfo(!showPetInfo);
+  };
+
   const getPetEmoji = () => {
     switch (petMood) {
       case "happy": return "😊";
@@ -210,11 +262,71 @@ export default function Index() {
           <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary/20">
             <Phone className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary/20">
-            <MoreVertical className="h-5 w-5" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary/20">
+                <MoreVertical className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Opciones</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleShowProfile}>
+                <User className="mr-2 h-4 w-4" />
+                <span>Mi Perfil</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleShowInfo}>
+                <Info className="mr-2 h-4 w-4" />
+                <span>Info de Mascota</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={toggleDarkMode}>
+                {isDarkMode ? (
+                  <Sun className="mr-2 h-4 w-4" />
+                ) : (
+                  <Moon className="mr-2 h-4 w-4" />
+                )}
+                <span>{isDarkMode ? "Modo Claro" : "Modo Oscuro"}</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={toggleSound}>
+                {isSoundEnabled ? (
+                  <VolumeX className="mr-2 h-4 w-4" />
+                ) : (
+                  <Volume2 className="mr-2 h-4 w-4" />
+                )}
+                <span>{isSoundEnabled ? "Silenciar" : "Activar Sonido"}</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Configuración</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
+
+      {/* Pet Info Modal */}
+      {showPetInfo && (
+        <div className="p-3 bg-accent/10 border-b border-accent/20">
+          <div className="text-center mb-2">
+            <h3 className="font-semibold text-sm">Información de tu TamaChatBot</h3>
+          </div>
+          <div className="text-xs space-y-1 text-muted-foreground">
+            <p><strong>Nombre:</strong> TamaChatBot</p>
+            <p><strong>Edad:</strong> {Math.floor(Math.random() * 10) + 1} días</p>
+            <p><strong>Personalidad:</strong> Amigable y juguetón</p>
+            <p><strong>Comida favorita:</strong> Manzanas 🍎</p>
+            <p><strong>Actividad favorita:</strong> Chatear contigo</p>
+            <p><strong>Estado actual:</strong> {petMood === "happy" ? "Feliz" : petMood === "hungry" ? "Hambriento" : petMood === "sleepy" ? "Cansado" : petMood === "playful" ? "Juguetón" : "Triste"}</p>
+          </div>
+          <div className="text-center mt-2">
+            <Button variant="outline" size="sm" onClick={() => setShowPetInfo(false)}>
+              Cerrar
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Pet Stats */}
       <div className="p-3 bg-secondary/50 border-b border-border">
