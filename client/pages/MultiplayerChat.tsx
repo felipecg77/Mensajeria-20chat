@@ -4,7 +4,15 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, Utensils, Gamepad2, Send, ArrowLeft, Users, Crown, Copy, Share } from "lucide-react";
+import { Heart, Utensils, Gamepad2, Send, ArrowLeft, Users, Crown, Copy, Share, MoreVertical, Settings, User, Info, Moon, Sun, Volume2, VolumeX, LogOut } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Link, useNavigate } from "react-router-dom";
 import { TamagotchiType } from "./TamagotchiSelection";
 
@@ -64,6 +72,9 @@ export default function MultiplayerChat() {
     health: 90,
   });
   const [lastInteraction, setLastInteraction] = useState(new Date());
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isSoundEnabled, setIsSoundEnabled] = useState(true);
+  const [showPetInfo, setShowPetInfo] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -73,6 +84,21 @@ export default function MultiplayerChat() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    // Check if dark mode is enabled
+    const savedDarkMode = localStorage.getItem("darkMode");
+    if (savedDarkMode === "true") {
+      setIsDarkMode(true);
+      document.documentElement.classList.add("dark");
+    }
+
+    // Check sound preference
+    const savedSound = localStorage.getItem("soundEnabled");
+    if (savedSound === "false") {
+      setIsSoundEnabled(false);
+    }
+  }, []);
 
   useEffect(() => {
     // Load data from localStorage
@@ -248,6 +274,39 @@ export default function MultiplayerChat() {
     return "bg-destructive";
   };
 
+  const toggleDarkMode = () => {
+    const newDarkMode = !isDarkMode;
+    setIsDarkMode(newDarkMode);
+    localStorage.setItem("darkMode", newDarkMode.toString());
+
+    if (newDarkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  };
+
+  const toggleSound = () => {
+    const newSoundState = !isSoundEnabled;
+    setIsSoundEnabled(newSoundState);
+    localStorage.setItem("soundEnabled", newSoundState.toString());
+  };
+
+  const handleShowProfile = () => {
+    alert(`Perfil: ${userName}\nSala: ${currentRoom?.name}\nMascota: ${selectedTamagotchi?.name}`);
+  };
+
+  const handleShowInfo = () => {
+    setShowPetInfo(!showPetInfo);
+  };
+
+  const handleLeaveRoom = () => {
+    if (confirm("¿Estás seguro de que quieres salir de la sala?")) {
+      localStorage.removeItem("currentRoom");
+      navigate("/room-selection");
+    }
+  };
+
   const handleShareRoom = () => {
     if (currentRoom?.roomCode) {
       navigator.clipboard.writeText(currentRoom.roomCode);
@@ -292,15 +351,56 @@ export default function MultiplayerChat() {
         </div>
         <div className="flex items-center space-x-1">
           {currentRoom.roomCode && (
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               className="text-primary-foreground hover:bg-primary/20"
               onClick={handleShareRoom}
             >
               <Share className="h-4 w-4" />
             </Button>
           )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary/20">
+                <MoreVertical className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Opciones</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleShowProfile}>
+                <User className="mr-2 h-4 w-4" />
+                <span>Mi Perfil</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleShowInfo}>
+                <Info className="mr-2 h-4 w-4" />
+                <span>Info de Mascota</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={toggleDarkMode}>
+                {isDarkMode ? (
+                  <Sun className="mr-2 h-4 w-4" />
+                ) : (
+                  <Moon className="mr-2 h-4 w-4" />
+                )}
+                <span>{isDarkMode ? "Modo Claro" : "Modo Oscuro"}</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={toggleSound}>
+                {isSoundEnabled ? (
+                  <VolumeX className="mr-2 h-4 w-4" />
+                ) : (
+                  <Volume2 className="mr-2 h-4 w-4" />
+                )}
+                <span>{isSoundEnabled ? "Silenciar" : "Activar Sonido"}</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLeaveRoom} className="text-destructive">
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Salir de la Sala</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -323,6 +423,29 @@ export default function MultiplayerChat() {
           ))}
         </div>
       </div>
+
+      {/* Pet Info Modal */}
+      {showPetInfo && (
+        <div className="p-3 bg-accent/10 border-b border-accent/20">
+          <div className="text-center mb-2">
+            <h3 className="font-semibold text-sm">Información de {selectedTamagotchi?.name}</h3>
+          </div>
+          <div className="text-xs space-y-1 text-muted-foreground">
+            <p><strong>Tipo:</strong> {selectedTamagotchi?.name}</p>
+            <p><strong>Personalidad:</strong> {selectedTamagotchi?.personality}</p>
+            <p><strong>Habilidad:</strong> {selectedTamagotchi?.specialAbility}</p>
+            <p><strong>Rareza:</strong> {selectedTamagotchi?.rarity === "common" ? "Común" : selectedTamagotchi?.rarity === "rare" ? "Raro" : "Legendario"}</p>
+            <p><strong>Sala:</strong> {currentRoom?.name}</p>
+            <p><strong>Cuidadores:</strong> {connectedUsers.length} usuario(s)</p>
+            <p><strong>Estado actual:</strong> {petMood === "happy" ? "Feliz" : petMood === "hungry" ? "Hambriento" : petMood === "sleepy" ? "Cansado" : petMood === "playful" ? "Juguetón" : "Triste"}</p>
+          </div>
+          <div className="text-center mt-2">
+            <Button variant="outline" size="sm" onClick={() => setShowPetInfo(false)}>
+              Cerrar
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Pet Stats */}
       <div className="p-3 bg-secondary/50 border-b border-border">
